@@ -1,7 +1,7 @@
 package org.sopt.android1.domain.record.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.sopt.android1.domain.home.dto.response.HomeRecordsResponse;
+import org.sopt.android1.domain.record.response.HomeRecordsResponse;
 import org.sopt.android1.domain.record.service.RecordService;
 import org.sopt.android1.global.response.ApiResponseBody;
 import org.sopt.android1.global.response.SuccessCode;

@@ -1,4 +1,4 @@
-package org.sopt.android1.domain.home.dto.response;
+package org.sopt.android1.domain.record.response;
 
 import org.sopt.android1.domain.user.entity.UserEntity;
 
