@@ -136,11 +136,14 @@ public class RecordController {
             description = """
                     캘린더 셀 탭으로 진입한 상세 페이지에 표시할 단일 카드 정보를 조회합니다.
 
+                    - **라벨 필드 (클라가 그대로 표시)**
+                      - `dateLabel` — `recordedAt` 의 `M월 d일` (DETAIL 상단 타이틀)
+                      - `timeLabel` — `recordedAt` 의 `HH:mm`
+                      - `locationLabel` — `location` 의 시·도 접미사 제거 + 첫 2 토큰 (예: `서울 노원구`)
+                      - `voiceDurationLabel` — `voiceDurationSeconds` 의 `M:SS` (미첨부 시 `null`)
                     - **응답 미포함 (의도적 제외)**
-                      - `location` — 위치 정보 미저장 (MVP 범위 외)
-                      - `recordedAt` — 사진 EXIF 촬영 시각 미저장, 날짜는 `createdAt` 으로 갈음
-                      - `voiceUrl` / `voiceDurationSeconds` — 음성 파일 서버 미보관, 상세 페이지 음성 플레이어 MVP 제외
-                      - `content` — 별도 컬럼 자체가 없음, STT 변환문은 `title` 에 흡수되어 저장됨
+                      - `voiceUrl` — 음성 파일 서버 미보관 (길이만 보관)
+                      - `content` — 별도 컬럼 자체가 없음, STT 변환문은 클라 하드코딩
                       - `likeCount` / `commentCount` — 상세에서는 카운트 미노출 (HOME 카드 응답에만 포함)
                     """
     )
@@ -163,6 +166,10 @@ public class RecordController {
                                                 "title": "상추 모종 심기",
                                                 "photoUrl": "/uploads/9d3e8f1a-1a2b-4c3d-9e0f-7a6b5c4d3e2f.jpg",
                                                 "isShared": false,
+                                                "dateLabel": "5월 14일",
+                                                "timeLabel": "07:50",
+                                                "locationLabel": "서울 노원구",
+                                                "voiceDurationLabel": "0:30",
                                                 "createdAt": "2026-05-14T16:19:02+09:00"
                                               }
                                             }
