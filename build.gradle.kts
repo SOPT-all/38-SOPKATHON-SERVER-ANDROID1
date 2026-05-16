@@ -32,6 +32,8 @@ dependencies {
 	testCompileOnly("org.projectlombok:lombok")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testAnnotationProcessor("org.projectlombok:lombok")
+
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 }
 
 tasks.withType<Test> {
