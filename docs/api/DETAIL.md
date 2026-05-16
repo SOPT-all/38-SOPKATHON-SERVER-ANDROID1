@@ -26,14 +26,25 @@
 | data.title | String | Y | 기록 제목 | `"상추 모종 심기"` |
 | data.photoUrl | String | N | 사진 URL (없을 시 `null`) | `"https://.../lettuce.jpg"` |
 | data.isShared | Boolean | Y | 또래 게시판 공유 여부 | `false` |
-| data.createdAt | String (ISO-8601) | Y | 서버 저장 시각 (화면 상단 타이틀 노출 기준) | `"2026-05-14T16:19:02+09:00"` |
+| data.dateLabel | String | Y | 사진 촬영 날짜 라벨 (`recordedAt` 의 `M월 d일`) — DETAIL 상단 타이틀 노출 | `"5월 14일"` |
+| data.timeLabel | String | Y | 사진 촬영 시각 라벨 (`recordedAt` 의 `HH:mm`) | `"07:50"` |
+| data.locationLabel | String | Y | 위치 라벨 (시·도 접미사 제거 + 첫 2 토큰) — DETAIL 위치 칩 노출 | `"서울 노원구"` |
+| data.voiceDurationLabel | String | N | 음성 녹음 길이 라벨 (`M:SS` 형식). 미첨부 시 `null` | `"0:48"` |
+| data.createdAt | String (ISO-8601) | Y | 서버 저장 시각 (KST) | `"2026-05-14T16:19:02+09:00"` |
 
 > **응답에 포함되지 않는 필드 (의도적 제외)**
-> - `location` — 위치 정보 미저장 (MVP 범위 외).
-> - `recordedAt` — 사진 EXIF 촬영 시각 미저장. 날짜는 `createdAt` 으로 갈음.
-> - `voiceUrl` / `voiceDurationSeconds` — 음성 파일 서버 미보관, 상세 페이지 음성 플레이어 MVP 제외.
-> - `content` — 별도 컬럼 자체가 없음. STT 변환문은 `title` 에 흡수되어 저장됨.
+> - `voiceUrl` — 음성 파일 서버 미보관 (길이만 보관).
+> - `content` — 별도 컬럼 자체가 없음. STT 변환문은 클라가 하드코딩으로 노출.
 > - `likeCount` / `commentCount` — 상세에서는 카운트 미노출. HOME 카드 응답에만 포함.
+
+### 라벨 변환 규칙
+
+| 라벨 | 원본 | 변환 규칙 |
+|------|------|-----------|
+| `dateLabel` | `record.recorded_at` | `DateTimeFormatter("M'월' d'일'", Locale.KOREAN)` |
+| `timeLabel` | `record.recorded_at` | `DateTimeFormatter("HH:mm")` |
+| `locationLabel` | `record.location` | 공백 분리 후 첫 토큰을 시·도 매핑표로 단축 + 두 번째 토큰 그대로 (예: `서울시` → `서울`, `제주특별자치도` → `제주`, `전라남도` → `전남`). 단일 토큰이면 단축된 토큰만 |
+| `voiceDurationLabel` | `record.voice_duration_seconds` | `M:SS` (`30` → `0:30`, `90` → `1:30`, `null` → `null`) |
 
 ### Success Response Example
 
@@ -49,6 +60,10 @@
     "title": "상추 모종 심기",
     "photoUrl": "https://cdn.example.com/records/1/lettuce.jpg",
     "isShared": false,
+    "dateLabel": "5월 14일",
+    "timeLabel": "07:50",
+    "locationLabel": "서울 마포구",
+    "voiceDurationLabel": "0:30",
     "createdAt": "2026-05-14T16:19:02+09:00"
   }
 }
