@@ -155,7 +155,7 @@ docker compose up -d --build     # MySQL + 앱 + Caddy 기동
 1. `gh issue create` 로 이슈를 생성한다.
 2. 이슈 번호를 받아 브랜치를 생성한다 (예: `chore/#1/global`).
 3. 브랜치에서 작업하고 커밋 → 푸시한다.
-4. `gh pr create` 로 PR을 생성한다.
+4. `gh pr create` 로 PR을 생성한다. **PR 제목은 이슈 제목과 동일하게** 작성한다 (이슈 번호 등 부가 정보 추가 금지).
 5. PR 머지는 사용자가 수동으로 한다.
 6. 머지 완료 승인을 받은 뒤, `main` 체크아웃 → `git pull` 로 최신화한다.
 
