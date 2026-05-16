@@ -37,18 +37,18 @@
 
 ## 2. 노하우 기록
 
-부모 사용자가 등록한 노하우 카드 1건. 좋아요·댓글 누적 수를 카운터 컬럼으로 함께 보관.
+부모 사용자가 등록한 노하우 카드 1건.
 
 **테이블명:** `record`
 
 | Key | Name | Type | Constraint | Description | Example |
 |-----|------|------|------------|-------------|---------|
 | PK  | id | BIGINT | NOT NULL, AUTO_INCREMENT | 카드 ID | `1` |
-| FK  | user_id | BIGINT | NOT NULL, FK → `user.id` | 작성자 | `1` |
+|     | user_id | BIGINT | NOT NULL | 작성자 (논리적 FK → `user.id`, DB 제약 미적용) | `1` |
 |     | title | VARCHAR(255) | NOT NULL | 사용자가 직접 입력하는 기록 제목 (디자인 002 의 텍스트 필드 입력값. 음성 녹음과 무관) | `상추 모종 심기` |
-|     | photo_url | VARCHAR(500) | NULL | 첨부 사진 URL (미첨부 시 NULL) | `https://cdn.example.com/records/1/lettuce.jpg` |
+|     | photo_url | VARCHAR(500) | NULL | 첨부 사진 URL (미첨부 시 NULL). 더미는 `/dummy/p1.png` 등, 클라 업로드는 `/uploads/{uuid}.jpg` 형태 | `/dummy/p1.png` |
 |     | voice_duration_seconds | INT | NULL | 녹음 길이(초). HOME 카드 우상단 칩 노출 | `30` |
-|     | is_shared | BOOLEAN | NOT NULL, DEFAULT FALSE | 또래 게시판 공유 여부 | `false` |
+|     | is_shared | BOOLEAN | NOT NULL | 또래 게시판 공유 여부 | `false` |
 |     | location | VARCHAR(255) | NOT NULL | 안드로 클라가 EXIF GPS 를 변환해 보내는 한글 주소 문자열. DETAIL 위치 칩 노출 | `서울시 마포구 망원동` |
 |     | recorded_at | TIMESTAMP | NOT NULL | EXIF DateTimeOriginal — 사진 촬영 시각 (KST). DETAIL 타이틀 / ARCHIVE 캘린더 일자 매핑 기준 | `2026-05-14 16:19:02` |
 |     | created_at | TIMESTAMP | NOT NULL | 서버 저장 시각 | `2026-05-14 16:19:02` |
@@ -65,7 +65,7 @@
 
 | id | user_id | title | photo_url | voice_duration_seconds | is_shared | location | recorded_at | created_at |
 |----|---------|-------|-----------|------------------------|-----------|----------|-------------|------------|
-| 1 | 1 | 상추 모종 심기 | https://.../lettuce.jpg | 30 | true | 서울시 마포구 망원동 | 2026-05-14 16:19:02 | 2026-05-14 16:19:02 |
+| 1 | 1 | 상추 모종 심기 | /dummy/p1.png | 30 | true | 서울시 마포구 망원동 | 2026-05-14 16:19:02 | 2026-05-14 16:19:02 |
 
 ---
 
