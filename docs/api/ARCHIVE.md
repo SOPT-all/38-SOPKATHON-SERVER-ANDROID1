@@ -13,8 +13,8 @@
 
 | Name | Type | Required | Description | Example |
 |------|------|----------|-------------|---------|
-| year | Integer | Y | 조회 연도 | `2026` |
-| month | Integer | Y | 조회 월 (1~12) | `5` |
+| year | Integer | N | 조회 연도. 미전달 시 오늘 날짜 기준 연도 | `2026` |
+| month | Integer | N | 조회 월 (1~12). 미전달 시 오늘 날짜 기준 월 | `5` |
 
 ### Response Body
 

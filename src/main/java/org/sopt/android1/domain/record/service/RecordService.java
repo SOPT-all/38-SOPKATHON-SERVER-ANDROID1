@@ -3,11 +3,16 @@ package org.sopt.android1.domain.record.service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.YearMonth;
 import java.time.ZoneId;
+import java.util.LinkedHashMap;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.sopt.android1.domain.record.dto.request.RecordCreateRequest;
+import org.sopt.android1.domain.record.dto.response.RecordCalendarDayResponse;
+import org.sopt.android1.domain.record.dto.response.RecordCalendarResponse;
 import org.sopt.android1.domain.record.dto.response.RecordCreateResponse;
 import org.sopt.android1.domain.record.dto.response.RecordDetailResponse;
 import org.sopt.android1.domain.record.entity.RecordEntity;
@@ -49,6 +54,42 @@ public class RecordService {
 
         OffsetDateTime createdAt = entity.getCreatedAt().atZone(KST).toOffsetDateTime();
         return RecordDetailResponse.of(entity, createdAt);
+    }
+
+    @Transactional(readOnly = true)
+    public RecordCalendarResponse getCalendar(int year, int month) {
+        YearMonth targetMonth = YearMonth.of(year, month);
+        LocalDateTime startInclusive = targetMonth.atDay(1).atStartOfDay();
+        LocalDateTime endExclusive = targetMonth.plusMonths(1).atDay(1).atStartOfDay();
+
+        List<RecordEntity> records = recordRepository
+                .findAllByUserIdAndCreatedAtGreaterThanEqualAndCreatedAtLessThanOrderByCreatedAtDesc(
+                        DEFAULT_USER_ID,
+                        startInclusive,
+                        endExclusive
+                );
+
+        int sharedCount = (int) records.stream()
+                .filter(RecordEntity::isShared)
+                .count();
+
+        LinkedHashMap<Integer, RecordEntity> representativeByDay = new LinkedHashMap<>();
+        records.forEach(record -> representativeByDay.putIfAbsent(
+                record.getCreatedAt().getDayOfMonth(),
+                record
+        ));
+
+        List<RecordCalendarDayResponse> days = representativeByDay.values().stream()
+                .map(RecordCalendarDayResponse::from)
+                .toList();
+
+        return new RecordCalendarResponse(
+                year,
+                month,
+                records.size(),
+                sharedCount,
+                days
+        );
     }
 
     @Transactional
