@@ -26,9 +26,11 @@
 | photo | File | N | 첨부 사진 (단일 이미지) | `image/jpeg` |
 | voiceDurationSeconds | Integer | N | 녹음 길이(초). 또래 게시판 카드 우상단 칩에 노출됨 | `30` |
 | isShared | Boolean | Y | 또래 게시판 공유 여부 (`true` = 공유 / `false` = 저장만) | `false` |
+| location | String | Y | 안드로 클라가 EXIF GPS 를 변환해 보내는 한글 주소 문자열. DETAIL 위치 칩에 그대로 노출 | `"서울시 마포구 망원동"` |
+| recordedAt | String (ISO-8601) | Y | EXIF DateTimeOriginal — 사진 촬영 시각. DETAIL 타이틀 / ARCHIVE 캘린더 일자 매핑 기준 | `"2026-05-14T16:19:02+09:00"` |
 
 > 음성 파일·STT 결과는 서버에 전송하지 않는다 — 길이(`voiceDurationSeconds`) 만 전송한다. STT 결과는 클라가 `"안녕하세요"` 로 하드코딩한다.
-> 위치 / 촬영 시각 정보는 MVP 범위에서 저장하지 않는다. 디자인의 위치 칩은 MVP 제외, 날짜는 서버 `createdAt` 으로 노출한다.
+> 위치(`location`) / 촬영 시각(`recordedAt`) 은 안드로 클라가 사진 EXIF 에서 추출해 함께 전송한다.
 
 ### Request Example
 
@@ -53,6 +55,14 @@ Content-Disposition: form-data; name="voiceDurationSeconds"
 Content-Disposition: form-data; name="isShared"
 
 false
+------Boundary
+Content-Disposition: form-data; name="location"
+
+서울시 마포구 망원동
+------Boundary
+Content-Disposition: form-data; name="recordedAt"
+
+2026-05-14T16:19:02+09:00
 ------Boundary--
 ```
 
@@ -69,6 +79,8 @@ false
 | data.photoUrl | String | N | 첨부 사진 URL (미첨부 시 `null`) | `"https://.../lettuce.jpg"` |
 | data.voiceDurationSeconds | Integer | N | 녹음 길이(초). 없을 시 `null` | `30` |
 | data.isShared | Boolean | Y | 또래 게시판 공유 여부 | `false` |
+| data.location | String | Y | 한글 주소 문자열 | `"서울시 마포구 망원동"` |
+| data.recordedAt | String (ISO-8601) | Y | EXIF 촬영 시각 (KST) | `"2026-05-14T16:19:02+09:00"` |
 | data.createdAt | String (ISO-8601) | Y | 서버 저장 시각 | `"2026-05-14T16:19:02+09:00"` |
 
 ### Success Response Example
@@ -86,6 +98,8 @@ false
     "photoUrl": "https://cdn.example.com/records/1/lettuce.jpg",
     "voiceDurationSeconds": 30,
     "isShared": false,
+    "location": "서울시 마포구 망원동",
+    "recordedAt": "2026-05-14T16:19:02+09:00",
     "createdAt": "2026-05-14T16:19:02+09:00"
   }
 }
