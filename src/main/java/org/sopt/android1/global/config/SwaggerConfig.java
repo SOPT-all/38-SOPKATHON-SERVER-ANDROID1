@@ -14,7 +14,7 @@ public class SwaggerConfig {
 	@Bean
 	public OpenAPI openAPI() {
 		Server devServer = new Server().url("http://localhost:8080/").description("개발 서버");
-		Server prodServer = new Server().url("https://sopkathon.o-r.kr/api").description("운영 서버");
+		Server prodServer = new Server().url("https://sopkathon.o-r.kr/").description("운영 서버");
 
 		return new OpenAPI()
 			.servers(List.of(devServer, prodServer))
