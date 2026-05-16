@@ -23,14 +23,15 @@
 | PK  | id | BIGINT | NOT NULL, AUTO_INCREMENT | 사용자 ID | `1` |
 |     | name | VARCHAR(50) | NOT NULL | 이름 (카드에 `{name}님` 으로 노출) | `박순자` |
 |     | age | INT | NOT NULL | 나이 (카드에 `· {age}세` 로 노출) | `68` |
+|     | profile_image_url | VARCHAR(255) | NULL | 프로필 이미지 URL (HOME 카드 작성자 썸네일). 기존 행과의 호환을 위해 NULL 허용 — 더미·신규 데이터는 항상 채워짐 | `/dummy/profile_01.png` |
 |     | created_at | TIMESTAMP | NOT NULL | 생성 시각 | `2026-05-14 16:19:00` |
 |     | updated_at | TIMESTAMP | NOT NULL | 수정 시각 | `2026-05-14 16:19:00` |
 
 **Example Row**
 
-| id | name | age | created_at | updated_at |
-|----|------|-----|------------|------------|
-| 1 | 박순자 | 68 | 2026-05-14 16:19:00 | 2026-05-14 16:19:00 |
+| id | name | age | profile_image_url | created_at | updated_at |
+|----|------|-----|-------------------|------------|------------|
+| 1 | 박순자 | 68 | /dummy/profile_01.png | 2026-05-14 16:19:00 | 2026-05-14 16:19:00 |
 
 ---
 
