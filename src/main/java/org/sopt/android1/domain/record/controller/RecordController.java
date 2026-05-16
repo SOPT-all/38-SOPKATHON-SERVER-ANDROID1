@@ -225,7 +225,10 @@ public class RecordController {
                 .body(ApiResponseBody.ok(SuccessCode.OK, data));
     }
 
-    @Operation(summary = "홈 공유 기록 목록 조회", description = "홈 화면에 노출할 공유된 기록 목록을 최신순으로 조회합니다.")
+    @Operation(
+            summary = "오늘의 노화우 조회",
+            description = "홈 화면에 노출할 공유된 기록 목록을 최신순으로 조회합니다."
+    )
     @GetMapping("/")
     public ResponseEntity<ApiResponseBody<HomeRecordsResponse, Void>> getSharedRecords() {
         return ResponseEntity
