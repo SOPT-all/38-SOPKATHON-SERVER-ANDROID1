@@ -11,12 +11,15 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sopt.android1.domain.record.dto.request.RecordCreateRequest;
 import org.sopt.android1.domain.record.dto.response.RecordCreateResponse;
+import org.sopt.android1.domain.record.dto.response.RecordDetailResponse;
 import org.sopt.android1.domain.record.service.RecordService;
 import org.sopt.android1.global.response.ApiResponseBody;
 import org.sopt.android1.global.response.SuccessCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -124,5 +127,99 @@ public class RecordController {
         return ResponseEntity
                 .status(SuccessCode.CREATED.getStatus())
                 .body(ApiResponseBody.created(SuccessCode.CREATED, data));
+    }
+
+    @Operation(
+            summary = "노하우 카드 상세 조회",
+            description = """
+                    캘린더 셀 탭으로 진입한 상세 페이지에 표시할 단일 카드 정보를 조회합니다.
+
+                    - **응답 미포함 (의도적 제외)**
+                      - `location` — 위치 정보 미저장 (MVP 범위 외)
+                      - `recordedAt` — 사진 EXIF 촬영 시각 미저장, 날짜는 `createdAt` 으로 갈음
+                      - `voiceUrl` / `voiceDurationSeconds` — 음성 파일 서버 미보관, 상세 페이지 음성 플레이어 MVP 제외
+                      - `content` — 별도 컬럼 자체가 없음, STT 변환문은 `title` 에 흡수되어 저장됨
+                      - `likeCount` / `commentCount` — 상세에서는 카운트 미노출 (HOME 카드 응답에만 포함)
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "노하우 카드 상세 조회 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponseBody.class),
+                            examples = @ExampleObject(
+                                    name = "성공 예시",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "status": 200,
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "recordId": 1,
+                                                "title": "상추 모종 심기",
+                                                "photoUrl": "/uploads/9d3e8f1a-1a2b-4c3d-9e0f-7a6b5c4d3e2f.jpg",
+                                                "isShared": false,
+                                                "createdAt": "2026-05-14T16:19:02+09:00"
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "존재하지 않는 카드",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    name = "리소스 없음",
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "status": 404,
+                                              "message": "존재하지 않는 리소스입니다.",
+                                              "code": "COM_404_001",
+                                              "meta": {
+                                                "path": "/api/v1/records/1",
+                                                "timestamp": "2026-05-14T16:19:02+09:00"
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "서버 내부 오류",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    name = "서버 오류",
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "status": 500,
+                                              "message": "서버 내부 오류가 발생했습니다.",
+                                              "code": "COM_500_001",
+                                              "meta": {
+                                                "path": "/api/v1/records/1",
+                                                "timestamp": "2026-05-14T16:19:02+09:00"
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
+    @GetMapping("/{recordId}")
+    public ResponseEntity<ApiResponseBody<RecordDetailResponse, Void>> getDetail(
+            @PathVariable Long recordId
+    ) {
+        RecordDetailResponse data = recordService.getDetail(recordId);
+        return ResponseEntity
+                .status(SuccessCode.OK.getStatus())
+                .body(ApiResponseBody.ok(SuccessCode.OK, data));
     }
 }
