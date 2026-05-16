@@ -229,6 +229,64 @@ public class RecordController {
             summary = "오늘의 노화우 조회",
             description = "홈 화면에 노출할 공유된 기록 목록을 최신순으로 조회합니다."
     )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "오늘의 노하우 조회 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponseBody.class),
+                            examples = @ExampleObject(
+                                    name = "성공 예시",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "status": 200,
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "records": [
+                                                  {
+                                                    "recordId": 1,
+                                                    "author": {
+                                                      "name": "박순자",
+                                                      "age": 65,
+                                                      "profileImageUrl": "/static/dummy/profile_01.png"
+                                                    },
+                                                    "title": "상추 모종 심기",
+                                                    "photoUrl": "/uploads/9d3e8f1a-1a2b-4c3d-9e0f-7a6b5c4d3e2f.jpg",
+                                                    "voiceDurationSeconds": 30,
+                                                    "createdAt": "2026-05-14T16:19:02+09:00"
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "서버 내부 오류",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    name = "서버 오류",
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "status": 500,
+                                              "message": "서버 내부 오류가 발생했습니다.",
+                                              "code": "COM_500_001",
+                                              "meta": {
+                                                "path": "/api/v1/records/",
+                                                "timestamp": "2026-05-14T16:19:02+09:00"
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @GetMapping("/")
     public ResponseEntity<ApiResponseBody<HomeRecordsResponse, Void>> getSharedRecords() {
         return ResponseEntity
