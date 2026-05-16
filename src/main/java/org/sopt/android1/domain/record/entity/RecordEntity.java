@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,18 +45,28 @@ public class RecordEntity extends BaseEntity {
     @Column(name = "is_shared", nullable = false)
     private boolean isShared;
 
+    @Column(nullable = false, length = 255)
+    private String location;
+
+    @Column(name = "recorded_at", nullable = false)
+    private LocalDateTime recordedAt;
+
     @Builder
     private RecordEntity(
             Long userId,
             String title,
             String photoUrl,
             Integer voiceDurationSeconds,
-            boolean isShared
+            boolean isShared,
+            String location,
+            LocalDateTime recordedAt
     ) {
         this.userId = userId;
         this.title = title;
         this.photoUrl = photoUrl;
         this.voiceDurationSeconds = voiceDurationSeconds;
         this.isShared = isShared;
+        this.location = location;
+        this.recordedAt = recordedAt;
     }
 }
