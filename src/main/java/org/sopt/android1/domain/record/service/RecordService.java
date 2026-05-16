@@ -1,4 +1,4 @@
-package org.sopt.android1.domain.home.service;
+package org.sopt.android1.domain.record.service;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.android1.domain.home.dto.response.HomeRecordsResponse;
@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class HomeService {
+public class RecordService {
 
     private final RecordRepository recordRepository;
 
