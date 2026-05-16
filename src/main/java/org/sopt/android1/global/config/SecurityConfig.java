@@ -22,7 +22,13 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
-			.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+			.authorizeHttpRequests(auth -> auth.requestMatchers(
+				"/swagger-ui/**",
+				"/swagger-ui.html",
+				"/v3/api-docs/**",
+				"/v3/api-docs.yaml"
+			).permitAll()
+			.anyRequest().permitAll());
 		return http.build();
 	}
 
