@@ -1,9 +1,16 @@
 -- 더미 사용자 (디자인 001 의 작성자 라인업: 박순자·김영호·이정희·최복녀)
-INSERT IGNORE INTO user (id, name, age, created_at, updated_at) VALUES
-    (1, '박순자', 68, NOW(), NOW()),
-    (2, '김영호', 62, NOW(), NOW()),
-    (3, '이정희', 65, NOW(), NOW()),
-    (4, '최복녀', 70, NOW(), NOW());
+-- 프로필 이미지는 profile_01 / profile_02 두 종을 번갈아 매핑
+INSERT IGNORE INTO user (id, name, age, profile_image_url, created_at, updated_at) VALUES
+    (1, '박순자', 68, '/dummy/profile_01.png', NOW(), NOW()),
+    (2, '김영호', 62, '/dummy/profile_02.png', NOW(), NOW()),
+    (3, '이정희', 65, '/dummy/profile_01.png', NOW(), NOW()),
+    (4, '최복녀', 70, '/dummy/profile_02.png', NOW(), NOW());
+
+-- 기존 행 백필 (INSERT IGNORE 는 기존 행을 갱신하지 않으므로 NULL 인 경우 보충)
+UPDATE user SET profile_image_url = '/dummy/profile_01.png' WHERE id = 1 AND profile_image_url IS NULL;
+UPDATE user SET profile_image_url = '/dummy/profile_02.png' WHERE id = 2 AND profile_image_url IS NULL;
+UPDATE user SET profile_image_url = '/dummy/profile_01.png' WHERE id = 3 AND profile_image_url IS NULL;
+UPDATE user SET profile_image_url = '/dummy/profile_02.png' WHERE id = 4 AND profile_image_url IS NULL;
 
 -- 더미 노하우 카드 (사진 매핑: p1 상추모종 / p2 토마토 / p3 오이 / p4 당근 / p5 산책로(쑥) / p6 자색 무 절임)
 INSERT IGNORE INTO record (id, user_id, title, photo_url, voice_duration_seconds, is_shared, location, recorded_at, created_at, updated_at) VALUES

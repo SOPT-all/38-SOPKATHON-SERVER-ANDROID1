@@ -28,9 +28,13 @@ public class UserEntity extends BaseEntity {
     @Column(nullable = false)
     private int age;
 
+    @Column(name = "profile_image_url", length = 255)
+    private String profileImageUrl;
+
     @Builder
-    private UserEntity(String name, int age) {
+    private UserEntity(String name, int age, String profileImageUrl) {
         this.name = name;
         this.age = age;
+        this.profileImageUrl = profileImageUrl;
     }
 }
