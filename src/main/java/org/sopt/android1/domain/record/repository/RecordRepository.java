@@ -7,6 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RecordRepository extends JpaRepository<RecordEntity, Long> {
 
-    @EntityGraph(attributePaths = "user")
     List<RecordEntity> findAllByIsSharedTrueOrderByCreatedAtDesc();
 }
