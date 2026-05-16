@@ -1,4 +1,4 @@
-package org.sopt.android1.config;
+package org.sopt.android1.global.config;
 
 import java.util.List;
 
