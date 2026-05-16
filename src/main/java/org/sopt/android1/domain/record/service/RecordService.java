@@ -19,6 +19,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.sopt.android1.domain.record.response.HomeRecordsResponse;
+import org.sopt.android1.domain.user.entity.UserEntity;
+import org.sopt.android1.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -90,5 +97,40 @@ public class RecordService {
     private String resolveExtension(String originalFilename) {
         String ext = StringUtils.getFilenameExtension(originalFilename);
         return ext == null || ext.isBlank() ? "" : "." + ext;
+    }
+
+    private final UserRepository userRepository;
+
+    @Transactional(readOnly = true)
+    public HomeRecordsResponse getSharedRecords() {
+        var records = recordRepository.findAllByIsSharedTrueOrderByCreatedAtDesc();
+        var usersById = getUsersById(records);
+
+        validateAuthorsExist(records, usersById);
+
+        return HomeRecordsResponse.from(records, usersById);
+    }
+
+    private Map<Long, UserEntity> getUsersById(List<RecordEntity> records) {
+        var userIds = records.stream()
+            .map(RecordEntity::getUserId)
+            .distinct()
+            .toList();
+
+        return userRepository.findAllById(userIds).stream()
+            .collect(Collectors.toMap(UserEntity::getId, Function.identity()));
+    }
+
+    private void validateAuthorsExist(
+        List<RecordEntity> records,
+        Map<Long, UserEntity> usersById
+    ) {
+        records.stream()
+            .map(RecordEntity::getUserId)
+            .filter(userId -> !usersById.containsKey(userId))
+            .findFirst()
+            .ifPresent(userId -> {
+                throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "userId=" + userId);
+            });
     }
 }

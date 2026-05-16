@@ -1,28 +1,30 @@
 package org.sopt.android1.domain.record.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.sopt.android1.domain.record.response.HomeRecordsResponse;
+import org.sopt.android1.global.response.ApiResponseBody;
+import org.sopt.android1.global.response.SuccessCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.sopt.android1.domain.record.dto.request.RecordCreateRequest;
 import org.sopt.android1.domain.record.dto.response.RecordCreateResponse;
 import org.sopt.android1.domain.record.dto.response.RecordDetailResponse;
 import org.sopt.android1.domain.record.service.RecordService;
-import org.sopt.android1.global.response.ApiResponseBody;
-import org.sopt.android1.global.response.SuccessCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Record", description = "노하우 기록 도메인 — 등록 / 조회")
 @RestController
@@ -221,5 +223,73 @@ public class RecordController {
         return ResponseEntity
                 .status(SuccessCode.OK.getStatus())
                 .body(ApiResponseBody.ok(SuccessCode.OK, data));
+    }
+
+    @Operation(
+            summary = "오늘의 노화우 조회",
+            description = "홈 화면에 노출할 공유된 기록 목록을 최신순으로 조회합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "오늘의 노하우 조회 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponseBody.class),
+                            examples = @ExampleObject(
+                                    name = "성공 예시",
+                                    value = """
+                                            {
+                                              "success": true,
+                                              "status": 200,
+                                              "message": "요청이 성공했습니다.",
+                                              "data": {
+                                                "records": [
+                                                  {
+                                                    "recordId": 1,
+                                                    "author": {
+                                                      "name": "박순자",
+                                                      "age": 65,
+                                                      "profileImageUrl": "/static/dummy/profile_01.png"
+                                                    },
+                                                    "title": "상추 모종 심기",
+                                                    "photoUrl": "/uploads/9d3e8f1a-1a2b-4c3d-9e0f-7a6b5c4d3e2f.jpg",
+                                                    "voiceDurationSeconds": 30,
+                                                    "createdAt": "2026-05-14T16:19:02+09:00"
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "서버 내부 오류",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    name = "서버 오류",
+                                    value = """
+                                            {
+                                              "success": false,
+                                              "status": 500,
+                                              "message": "서버 내부 오류가 발생했습니다.",
+                                              "code": "COM_500_001",
+                                              "meta": {
+                                                "path": "/api/v1/records/",
+                                                "timestamp": "2026-05-14T16:19:02+09:00"
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
+    @GetMapping("/")
+    public ResponseEntity<ApiResponseBody<HomeRecordsResponse, Void>> getSharedRecords() {
+        return ResponseEntity
+            .ok(ApiResponseBody.ok(SuccessCode.OK, recordService.getSharedRecords()));
     }
 }
