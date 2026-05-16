@@ -17,6 +17,10 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
     show-sql: true
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
 
 management:
   endpoints:

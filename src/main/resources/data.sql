@@ -1,0 +1,15 @@
+-- 더미 사용자 (디자인 001 의 작성자 라인업: 박순자·김영호·이정희·최복녀)
+INSERT IGNORE INTO user (id, name, age, created_at, updated_at) VALUES
+    (1, '박순자', 68, NOW(), NOW()),
+    (2, '김영호', 62, NOW(), NOW()),
+    (3, '이정희', 65, NOW(), NOW()),
+    (4, '최복녀', 70, NOW(), NOW());
+
+-- 더미 노하우 카드 (사진 매핑: p1 상추모종 / p2 토마토 / p3 오이 / p4 당근 / p5 산책로(쑥) / p6 자색 무 절임)
+INSERT IGNORE INTO record (id, user_id, title, photo_url, voice_duration_seconds, is_shared, created_at, updated_at) VALUES
+    (1, 1, '상추 모종 심기',          '/dummy/p1.png', 30, true, NOW(), NOW()),
+    (2, 2, '방울토마토 곁순 따기',     '/dummy/p2.png', 45, true, NOW(), NOW()),
+    (3, 3, '오이 망 치는 법',          '/dummy/p3.png', 22, true, NOW(), NOW()),
+    (4, 4, '당근 캐기 좋은 때',        '/dummy/p4.png', 18, true, NOW(), NOW()),
+    (5, 1, '새벽 산책길에 만난 쑥',     '/dummy/p5.png', 22, true, NOW(), NOW()),
+    (6, 2, '자색 무 절임 만드는 법',    '/dummy/p6.png', 38, true, NOW(), NOW());
