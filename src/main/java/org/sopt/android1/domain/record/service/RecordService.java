@@ -9,6 +9,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.sopt.android1.domain.record.dto.request.RecordCreateRequest;
 import org.sopt.android1.domain.record.dto.response.RecordCreateResponse;
+import org.sopt.android1.domain.record.dto.response.RecordDetailResponse;
 import org.sopt.android1.domain.record.entity.RecordEntity;
 import org.sopt.android1.domain.record.repository.RecordRepository;
 import org.sopt.android1.global.exception.BusinessException;
@@ -33,6 +34,15 @@ public class RecordService {
 
     @Value("${app.public-url-prefix}")
     private String publicUrlPrefix;
+
+    @Transactional(readOnly = true)
+    public RecordDetailResponse getDetail(Long recordId) {
+        RecordEntity entity = recordRepository.findById(recordId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        OffsetDateTime createdAt = entity.getCreatedAt().atZone(KST).toOffsetDateTime();
+        return RecordDetailResponse.of(entity, createdAt);
+    }
 
     @Transactional
     public RecordCreateResponse create(RecordCreateRequest request) {
