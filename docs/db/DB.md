@@ -1,29 +1,84 @@
 # DB 테이블 명세
 
+| 항목 | 내용 |
+|------|------|
+| 서비스 | 노화우 (老하우) |
+| DBMS | MySQL 8.0 (운영) / H2 (테스트) |
+| 공통 컬럼 | `created_at`, `updated_at` — `BaseEntity` 상속 |
+| 작성일 | 2026-05-17 |
+
+> MVP 기준 2 테이블 — `user` / `record`.
+> 좋아요·댓글 수는 DB 에 보관하지 않는다 — 클라 하드코딩으로 노출.
+
 ---
 
-## N. [테이블 한글명]
+## 1. 사용자
 
-[테이블에 대한 한 줄 설명]
+서비스 사용자(부모/또래) 1인을 표현한다. 이름·나이를 카드에 노출하기 위해 보관.
 
-**테이블명:** `[table_name]`
+**테이블명:** `user`
 
 | Key | Name | Type | Constraint | Description | Example |
 |-----|------|------|------------|-------------|---------|
-| PK  | id   |      | NOT NULL   |             |         |
-|     |      |      |            |             |         |
+| PK  | id | BIGINT | NOT NULL, AUTO_INCREMENT | 사용자 ID | `1` |
+|     | name | VARCHAR(50) | NOT NULL | 이름 (카드에 `{name}님` 으로 노출) | `박순자` |
+|     | age | INT | NOT NULL | 나이 (카드에 `· {age}세` 로 노출) | `68` |
+|     | created_at | TIMESTAMP | NOT NULL | 생성 시각 | `2026-05-14 16:19:00` |
+|     | updated_at | TIMESTAMP | NOT NULL | 수정 시각 | `2026-05-14 16:19:00` |
 
 **Example Row**
 
-| id |   |   |
-|----|---|---|
-|    |   |   |
+| id | name | age | created_at | updated_at |
+|----|------|-----|------------|------------|
+| 1 | 박순자 | 68 | 2026-05-14 16:19:00 | 2026-05-14 16:19:00 |
+
+---
+
+## 2. 노하우 기록
+
+부모 사용자가 등록한 노하우 카드 1건. 좋아요·댓글 누적 수를 카운터 컬럼으로 함께 보관.
+
+**테이블명:** `record`
+
+| Key | Name | Type | Constraint | Description | Example |
+|-----|------|------|------------|-------------|---------|
+| PK  | id | BIGINT | NOT NULL, AUTO_INCREMENT | 카드 ID | `1` |
+| FK  | user_id | BIGINT | NOT NULL, FK → `user.id` | 작성자 | `1` |
+|     | title | VARCHAR(255) | NOT NULL | 사용자가 직접 입력하는 기록 제목 (디자인 002 의 텍스트 필드 입력값. 음성 녹음과 무관) | `상추 모종 심기` |
+|     | photo_url | VARCHAR(500) | NULL | 첨부 사진 URL (미첨부 시 NULL) | `https://cdn.example.com/records/1/lettuce.jpg` |
+|     | voice_duration_seconds | INT | NULL | 녹음 길이(초). HOME 카드 우상단 칩 노출 | `30` |
+|     | is_shared | BOOLEAN | NOT NULL, DEFAULT FALSE | 또래 게시판 공유 여부 | `false` |
+|     | created_at | TIMESTAMP | NOT NULL | 생성 시각. DETAIL 화면 타이틀 / ARCHIVE 캘린더 일자 매핑 기준 | `2026-05-14 16:19:02` |
+|     | updated_at | TIMESTAMP | NOT NULL | 수정 시각 | `2026-05-14 16:19:02` |
+
+**Index**
+
+| Name | Columns | Purpose |
+|------|---------|---------|
+| `idx_record_is_shared_created_at` | (`is_shared`, `created_at` DESC) | HOME 또래 게시판 최신순 조회 |
+| `idx_record_user_id_created_at` | (`user_id`, `created_at` DESC) | ARCHIVE 본인 월별 조회 |
+
+**Example Row**
+
+| id | user_id | title | photo_url | voice_duration_seconds | is_shared | created_at |
+|----|---------|-------|-----------|------------------------|-----------|------------|
+| 1 | 1 | 상추 모종 심기 | https://.../lettuce.jpg | 30 | true | 2026-05-14 16:19:02 |
 
 ---
 
 ## ERD 관계
 
 ```
-[테이블A]   1 ─── N   [테이블B]
-[테이블B]   1 ─── 1   [테이블C]
+[user] 1 ─── N [record]   (작성자)
 ```
+
+---
+
+## MVP 운영 노트
+
+- **좋아요·댓글 수 미보관** — 컬럼 자체 없음. HOME 카드의 `♥ 24` / `💬 8` 은 클라 하드코딩으로 표시. 서버 API 도 별도 두지 않음.
+- **음성 녹음 / STT** — 클라가 녹음 UX 수행 후 STT 결과를 받은 척 `"안녕하세요"` 로 하드코딩 보관. 서버는 본문을 수신·저장하지 않으며, 길이(`voice_duration_seconds`) 만 받아 HOME 카드 우상단 칩에 노출.
+- **본문 컬럼 없음** — 위 이유로 DB 에 본문 텍스트 컬럼 자체를 두지 않는다. 화면의 본문 영역은 클라가 들고 있는 하드코딩 값(`"안녕하세요"`) 을 그대로 노출.
+- **위치 / 촬영 시각** — 컬럼 자체를 두지 않음. 디자인의 위치 칩은 MVP 제외, 날짜는 `created_at` 으로 갈음.
+- **ddl-auto** — `application.yaml` 의 `ddl-auto: update` 환경에서 엔티티 추가 시 컬럼·테이블이 자동 반영됨 (운영 영향 큰 변경은 사전 공유).
+- **공통 컬럼** — `created_at`, `updated_at` 은 `global/persistence/BaseEntity` 상속으로 자동 관리.
