@@ -633,3 +633,49 @@ DB는 §6.3 백업 파일로 복원. 운영 중 큰 변경 직전엔 백업 한 
 - [ ] `docker compose ps` 세 서비스 모두 `running` (mysql 은 `healthy`)
 - [ ] `curl -sI https://sopkathon.o-r.kr/actuator/health` → `HTTP/2 200`
 - [ ] 브라우저에서 https 접속 시 자물쇠 정상, 인증서 issuer 가 `Let's Encrypt`
+
+---
+
+## 11. 트러블슈팅
+
+### 11-1. 메모리 부족으로 배포·SSH 동시 장애
+
+**상황**
+
+PR #34 머지 직후 `Deploy to EC2` 워크플로가 10분 만에 타임아웃으로 실패. 같은 시각에 SSH 접속도 "TCP 연결 후 banner 응답 없음" 상태로 멈췄고, 사이트(`sopkathon.o-r.kr`) 도 HTTP/HTTPS 모두 응답 없음.
+
+**원인 분석**
+
+`t3.small` (RAM 2 GB) 한 대에 MySQL·앱·Caddy 컨테이너가 떠 있는 상태에서, 새 PR 배포가 EC2 위에서 Gradle `compileJava` 풀빌드를 돌리며 JDK 21 컴파일러가 1 GB 넘게 추가로 점유 → **합산 ~2.5–3 GB > 2 GB**. 스왑이 없어 OOM/스래싱 상태에 진입.
+
+이 영향으로 SSH 데몬도 banner 응답을 못 보낼 정도로 시스템이 정지 — TCP 핸드셰이크(커널)는 되지만 응용 레벨 응답 불가. 사이트 응답이 끊긴 것도 같은 원인.
+
+지금까지의 작은 PR 은 Gradle 캐시 덕에 통과했지만, 이번 PR 은 신규 클래스 5개 추가로 캐시가 깨져 풀빌드가 돌아간 게 트리거.
+
+**즉시 대응**
+
+1. AWS 콘솔에서 EC2 재부팅
+2. EC2 Instance Connect 로 접속해 `docker compose down && docker compose up -d --build` 수동 기동
+3. 컨테이너 3종 정상 기동 확인 후 서비스 복구
+
+**다음 번 대응 (예방)**
+
+- 가장 손쉬운 처방: **EC2 에 스왑 추가** (2–4 GB)
+
+  ```bash
+  sudo fallocate -l 4G /swapfile
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile
+  sudo swapon /swapfile
+  echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+  ```
+
+  → 빌드는 느려지지만 OOM/스래싱은 피함.
+
+- 정석은 **CI 에서 jar 빌드 → EC2 엔 jar 만 배포** — EC2 에서 JDK 컴파일 자체를 없앤다.
+- 또는 **인스턴스 업그레이드** (`t3.small` → `t3.medium` 4 GB).
+
+**교훈**
+
+- "SSH 가 안 된다" = 네트워크 문제로 단정하지 말 것. 시스템 전체 스래싱이면 SSH 도 같이 죽는다. TCP 핸드셰이크는 되는데 banner 가 안 오면 메모리 의심을 우선순위에 둘 것.
+- 작은 인스턴스에서 빌드+런타임을 같이 굴리지 말 것. CI 가 빌드 책임을 가져가는 게 정석.
